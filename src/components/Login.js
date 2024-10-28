@@ -6,7 +6,7 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import signupImage from '../assets/Singup-image.jpg';
 
-const Login = () => {
+const Login = ({ setUser, setUserRole }) => { // Accept props
     const navigate = useNavigate();
     const db = getFirestore();
 
@@ -30,11 +30,17 @@ const Login = () => {
                         icon: 'warning',
                         confirmButtonText: 'Okay'
                     });
-                    return; // Stop further execution
+                    return; // Stop further execution, do not set user or role
                 }
 
-                // If roles match, redirect to Home
-                navigate('/home');
+                // If roles match, proceed to set user and redirect based on the role
+                setUser(user); // Set user in App state
+                setUserRole(existingRole); // Update user role
+                if (existingRole === "Donor") {
+                    navigate('/home'); // Redirect to donor home page
+                } else if (existingRole === "Shelter Staff") {
+                    navigate('/shelter-dashboard'); // Redirect to shelter admin dashboard
+                }
             } else {
                 // User does not exist in Firestore
                 Swal.fire({
@@ -62,8 +68,8 @@ const Login = () => {
             <div className="flex flex-col items-center justify-center h-screen bg-no-repeat bg-center"
                 style={{
                     backgroundImage: `url(${signupImage})`,
-                    backgroundSize: '100% auto', // Default size for larger screens
-                    backgroundPosition: 'center', // Center the image
+                    backgroundSize: '100% auto',
+                    backgroundPosition: 'center',
                 }}
             >
                 <div className="bg-black bg-opacity-50 w-full h-full flex flex-col items-center justify-center">
@@ -82,11 +88,12 @@ const Login = () => {
                             Login as Shelter Staff
                         </button>
                     </div>
+                    <div className="flex items-center text-white -mt-2">
+                        <span>Don't have an account? <a href="/signup" className="underline text-blue-300 underline hover:text-blue-500 transition duration-200">Sign up</a></span>
+                    </div>
                 </div>
             </div>
-
         </>
-
     );
 };
 

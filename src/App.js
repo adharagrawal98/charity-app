@@ -1,3 +1,4 @@
+// App.js
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'; // Removed BrowserRouter import
 import { getFirestore, doc, getDoc } from 'firebase/firestore'; // Ensure you're importing Firestore functions
@@ -7,6 +8,8 @@ import SignUp from './components/SignUp';
 import Login from './components/Login';
 import Home from './components/Home';
 import ShelterDashboard from './components/ShelterDashboard'; // Import your Shelter Dashboard
+import ContactForm from './components/ContactUs';
+import Testimonials from './components/Testimonials';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -23,6 +26,8 @@ const App = () => {
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
           if (userDoc.exists()) {
             setUserRole(userDoc.data().role); // Set the role state
+          } else {
+            setUserRole(null); // Reset role if user is not found in Firestore
           }
         };
         fetchUserRole();
@@ -49,13 +54,33 @@ const App = () => {
       {/* Conditional Navbar Rendering */}
       {user && userRole && (
         <nav className="flex items-center justify-between p-4 bg-black text-white">
-          {/* Align "Shelter App" to the left */}
-          <div className="text-lg font-bold flex-grow">Shelter App</div>
+          {/* Align "Shelter App" to the left and make it clickable */}
+          <div
+            className="text-lg font-bold flex-grow cursor-pointer"
+            onClick={() => navigate('/')} // Navigate to homepage on click
+          >
+            Shelter App
+          </div>
           {/* Align buttons to the right */}
           <div className="flex space-x-4"> {/* Add space between buttons */}
-            <button className="text-white text-sm md:text-base hover:text-blue-300" onClick={() => navigate('/testimonials')}>Testimonials</button>
-            <button className="text-white text-sm md:text-base hover:text-blue-300" onClick={() => navigate('/contact')}>Contact Us</button>
-            <button onClick={handleSignOut} className="hover:text-blue-300">Sign Out</button>
+            <button
+              className="text-white text-sm md:text-base hover:text-blue-300"
+              onClick={() => navigate('/testimonials')}
+            >
+              Testimonials
+            </button>
+            <button
+              className="text-white text-sm md:text-base hover:text-blue-300"
+              onClick={() => navigate('/contact-us')}
+            >
+              Contact Us
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="hover:text-blue-300"
+            >
+              Sign Out
+            </button>
           </div>
         </nav>
       )}
@@ -64,8 +89,10 @@ const App = () => {
         <Route path="/home" element={user && userRole === 'Donor' ? <Home user={user} /> : <Navigate to="/login" />} />
         <Route path="/shelter-dashboard" element={user && userRole === 'Shelter Staff' ? <ShelterDashboard user={user} /> : <Navigate to="/login" />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login setUser={setUser} setUserRole={setUserRole} />} />
+        <Route path="/login" element={<Login setUser={setUser} setUserRole={setUserRole} />} /> {/* Removed the '*' here */}
         <Route path="/" element={user ? <Navigate to={userRole === 'Donor' ? '/home' : '/shelter-dashboard'} /> : <Navigate to="/login" />} />
+        <Route path="/testimonials" element={<Testimonials />} />
+        <Route path="/contact-us" element={<ContactForm />} />
       </Routes>
     </div>
   );
